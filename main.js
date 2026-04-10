@@ -231,19 +231,15 @@ function finalizarQuiz() {
     const resultado = calcularResultado();
     const ehLeadQuente = verificarLeadQuente();
     
-    // Container final
+    // Container final: Primeira parte é a captura, a segunda é o resultado
     const finalHtml = `
-        <div class="result-box fade-in visible">
-            <span class="result-icon">${resultado.icone}</span>
-            <h3 class="result-title ${resultado.classeDeRisco}">${resultado.titulo}</h3>
+        <div class="result-box fade-in visible" id="capture-section">
+            <h3 class="result-title" style="color: var(--primary);">Quase lá! Seu diagnóstico está pronto.</h3>
             <div class="result-desc">
-                <p>${resultado.descricao}</p>
+                <p>Para visualizar o resultado da sua análise e entender o cenário financeiro da sua empresa, preencha os dados abaixo.</p>
             </div>
             
             <div style="background: var(--white); padding: 32px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 8px 32px rgba(26,26,26,0.03); margin-top: 32px; text-align: left;">
-                <p style="color: var(--text-primary); margin-bottom: 24px; font-size: 16px; line-height: 1.6; font-weight: 500; text-align: center;">
-                    Sua situação exige análise estratégica. Nossa equipe entrará em contato para entender melhor o seu caso.
-                </p>
                 <form id="quiz-lead-form" class="quiz-form">
                     <div class="form-group" style="text-align: left;">
                         <label for="lead-name">Nome Completo</label>
@@ -258,10 +254,27 @@ function finalizarQuiz() {
                         <input type="email" id="lead-email" name="email" required placeholder="seu@email.com">
                     </div>
                     <button type="submit" class="btn-cta w-full" id="btn-ver-resultado" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.162-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
-                        ${resultado.botaoTexto}
+                        Ver Meu Diagnóstico Gratuito
                     </button>
                 </form>
+            </div>
+        </div>
+
+        <div class="result-box fade-in" id="result-section" style="display: none;">
+            <span class="result-icon">${resultado.icone}</span>
+            <h3 class="result-title ${resultado.classeDeRisco}">${resultado.titulo}</h3>
+            <div class="result-desc">
+                <p>${resultado.descricao}</p>
+            </div>
+            
+            <div style="background: var(--white); padding: 32px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 8px 32px rgba(26,26,26,0.03); margin-top: 32px;">
+                <p style="color: var(--text-primary); margin-bottom: 24px; font-size: 16px; line-height: 1.6; font-weight: 500;">
+                    Sua situação exige atenção profissional. Nossa equipe está à disposição para analisar estrategicamente o seu caso.
+                </p>
+                <button type="button" class="btn-cta w-full" id="btn-whatsapp-redirect" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.162-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
+                    ${resultado.botaoTexto}
+                </button>
             </div>
         </div>
     `;
@@ -269,8 +282,12 @@ function finalizarQuiz() {
     document.getElementById('quiz-final-step').innerHTML = finalHtml;
     showStep(6);
     
-    // Bind do formsubmit
     const quizLeadForm = document.getElementById('quiz-lead-form');
+    const captureSection = document.getElementById('capture-section');
+    const resultSection = document.getElementById('result-section');
+    const btnWhatsapp = document.getElementById('btn-whatsapp-redirect');
+
+    // Bind do formsubmit
     quizLeadForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -279,7 +296,7 @@ function finalizarQuiz() {
         const email = document.getElementById('lead-email').value;
         
         const submitBtn = quizLeadForm.querySelector('button[type="submit"]');
-        submitBtn.textContent = 'Aguarde...';
+        submitBtn.textContent = 'Calculando...';
         submitBtn.disabled = true;
 
         const waMsg = encodeURIComponent(`Olá Dra Bárbara! Vim pelo site. Fiz o diagnóstico financeiro e meu resultado foi: ${resultado.titulo}. Gostaria de entender mais meu caso.`);
@@ -292,8 +309,13 @@ function finalizarQuiz() {
             formData.append('whatsapp', whatsapp);
             formData.append('assunto', ehLeadQuente ? '[LEAD QUENTE] Diagnóstico do Quiz' : 'Diagnóstico do Quiz');
             formData.append('resultado', resultado.titulo);
+            formData.append('Pergunta_1_Tem_Dividas', quizState.q1 || 'Não respondido');
+            formData.append('Pergunta_2_Vinculo', quizState.q2 || 'Não respondido');
+            formData.append('Pergunta_3_Comprometimento', quizState.q3 || 'Não respondido');
+            formData.append('Pergunta_4_Valor_Aproximado', quizState.q4 || 'Não respondido');
+            formData.append('Pergunta_5_Situacoes_Sofridas', quizState.q5.length > 0 ? quizState.q5.join(', ') : 'Nenhuma');
             
-            fetch('https://formsubmit.co/ajax/bs@barbarasena.adv.br', {
+            fetch('https://formsubmit.co/ajax/barbarasena.advocacia@gmail.com', {
                 method: 'POST',
                 body: formData,
                 headers: { 'Accept': 'application/json' }
@@ -301,12 +323,26 @@ function finalizarQuiz() {
 
         } catch (err) {}
 
-        // Ao invés de uma nova tela, abre o Whatsapp em nova Guia!
-        window.open(waLink, '_blank');
-        
+        // Esconder o form e revelar o resultado
         setTimeout(() => {
-            submitBtn.innerHTML = '✔ Redirecionado para o WhatsApp!';
+            captureSection.style.display = 'none';
+            resultSection.style.display = 'block';
+            resultSection.classList.add('visible');
+            
+            // Scroll para topo do resultSection no mobile
+            const quizContainer = document.querySelector('.quiz-container');
+            if (quizContainer) {
+                window.scrollTo({
+                    top: quizContainer.getBoundingClientRect().top + window.scrollY - 120,
+                    behavior: 'smooth'
+                });
+            }
         }, 800);
+
+        // Bind do WhatsApp no resultado
+        btnWhatsapp.addEventListener('click', () => {
+            window.open(waLink, '_blank');
+        });
     });
 }
 
